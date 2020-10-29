@@ -20,8 +20,43 @@ esClient.ping({
     }
 });
 
-app.post('/', (req, res) => {
+app.post('/products', async (req, res) => {
+    try {
+        const result = await esClient.index({
+            index: 'products',
+            body: {
+                "id": req.body.id,
+                "name": req.body.name,
+                "price": req.body.price,
+                "description": req.body.description,
+            }
+        });
 
+        return res.send(result);
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+app.get('/products', async (req, res) => {
+    try {
+        const searchText = req.query.text;
+
+        const result = await esClient.search({
+            index: 'products',
+            body: {
+                query: {
+                    match: {
+                        "name": searchText.trim()
+                    }
+                }
+            }
+        })
+
+        return res.send(result);
+    } catch (err) {
+        console.log(err);
+    }
 });
 
 app.listen(process.env.PORT || 3000, () => {
